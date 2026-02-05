@@ -18,6 +18,8 @@ cargo install flip-link
 
 Install probe-rs by following the instructions at <https://probe.rs/docs/getting-started/installation/>.
 
+P.S. To correctly work with Jlink, you need to install other drivers for Jlink with ZADIG. I am using Windows OS. I have two devices for Jlink in Zadig: CDC and BULK. To install the WinUSB driver for BULK, I don't understand what to do for CDC, but I set `usbser` driver.
+
 ### 3. [`cargo-generate`]:
 
 ```bash
@@ -32,29 +34,16 @@ cargo install cargo-generate
 
 ### 1. Initialize the project template
 
-```bash
-cargo generate \
-    --git https://github.com/knurling-rs/app-template \
-    --branch main \
-    --name my-app
-```
-
-If you look into your new `my-app` folder, you'll find that there are a few `TODO`s in the files marking the properties you need to set.
-
-Let's walk through them together now.
+Clone this
 
 ### 2. Set `probe-rs` chip
 
 Pick a chip from ` probe-rs chip list` and enter it into `.cargo/config.toml`.
 
-If, for example, you have a nRF52840 Development Kit as used in one of [our exercises], replace `{{chip}}` with `nRF52840_xxAA`.
-
-[our workshops]: https://rust-exercises.ferrous-systems.com
-
 ```diff
  # .cargo/config.toml
 -runner = ["probe-rs", "run", "--chip", "$CHIP", "--log-format=oneline"]
-+runner = ["probe-rs", "run", "--chip", "nRF52840_xxAA", "--log-format=oneline"]
++runner = ["probe-rs", "run", "--chip", "STM32F103VE", "--log-format=oneline"]
 ```
 
 ### 3. Adjust the compilation target
@@ -92,6 +81,16 @@ For the nRF52840 you'll want to use the [`nrf52840-hal`].
 +nrf52840-hal = "0.14.0"
 ```
 
+For the stm32f1xx 
+```diff
+ # Cargo.toml
+ [dependencies]
+-# some-hal = "1.2.3"
++stm32f1xx-hal = { version = "0.11.0", features = ["stm32f103"]}
+```
+I added hal library for stm32f103
+Always need set in features set your processor model because be error
+
 ⚠️ Note for RP2040 users ⚠️
 
 You will need to not just specify the `rp-hal` HAL, but a BSP (board support crate) which includes a second stage bootloader. Please find a list of available BSPs [here](https://github.com/rp-rs/rp-hal-boards#packages).
@@ -120,7 +119,7 @@ MEMORY
 }
 ```
 
-The `memory.x` file is included in the `cortex-m-rt` linker script `link.x`, and so `link.x` is the one you should tell `rustc` to use (see the `.cargo/config.toml` file where we do that).
+The `memory.x` file is included in the `cortex-m-rt` linker script `link.x`, and so `link.x` is the one you should tell `rustc` to use (see the `.cargo/config.toml` file where we do that). Project have `memory.x` for stm32f103ve in root project  
 
 ### 7. Run!
 
